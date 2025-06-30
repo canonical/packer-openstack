@@ -1,0 +1,9 @@
+#cloud-config
+# this is needed (ssh_pwauth and chpasswd) for packer to ssh into the machine
+# it should be reverted by customization scripts at the end if you want to
+# follow best practices of a cloud image
+ssh_pwauth: true
+chpasswd:
+  expire: false
+  users:
+    - { name: ubuntu, password: ubuntu, type: text }

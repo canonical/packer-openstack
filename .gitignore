@@ -1,0 +1,3 @@
+openstack-iso-to-qcow2/build/*
+openstack-qcow2-to-qcow2/build/*
+

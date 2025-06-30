@@ -1,0 +1,97 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  refresh-installer:
+    # this is unstable and can cause issues, update later instead...
+    update: false
+
+  # This will allow the user to interactively influence automatic installation
+  # Values provided in autoinstall will become defaults so you can just click Next
+  # You can enable only specific dialogs
+#  interactive-sections: #don't leave a dangling parent if no children
+#    - identity
+#    - locale
+#    - keyboard
+#    - proxy
+#    - source
+#    - refresh-installer
+#    - network
+#    - apt
+#    - storage
+#    - ubuntu-pro
+#    - ssh
+#    - drivers
+#    - snaps
+
+  # system/environment configs
+  locale: en_US.UTF-8
+  timezone: geoip # 'geoip' for automatic or specific timezone name like "America/Chicago"
+  keyboard:
+    layout: us
+  #network:
+  #  version: 2
+  kernel:
+    flavor: generic # 'generic' or 'hwe'
+  drivers:
+    install: false # scan system & install extra hardware drivers
+  codecs:
+    install: false # install ubuntu-restricted-addons package
+  ssh:
+    install-server: true
+    allow-pw: false # normally disabled for cloud images
+    #authorized-keys:
+    #- key-string...
+    #- key-string...
+  source:
+    id: ubuntu-server # ubuntu-server-minimal, ubuntu-server
+#  proxy: http://192.168.0.1:8000
+#  ubuntu-pro:
+#    token: XXXXXXXXXXXX # This will hardcode the key, better if done later via cloud-init
+
+  identity:
+    # FIXME: while the hostname will be used, the realname/username/password part will be ignored.
+    # Reason is we delete 90-installer-* cloudinit files in late-commands
+    hostname: packer-ubuntu
+    realname: 'Ubuntu User'
+    username: ubuntu
+    password: '*'
+
+  storage:
+    layout:
+      # LVM partitioning is already the default, but explicitly specifying here
+      name: lvm
+      sizing-policy: all
+      match:
+        size: largest
+      # this is the initial LUKS passphrase (can be changed after install)
+      #password: ubuntu
+    #swap:
+    #  swap: 0
+
+  #snaps:
+  #  - name: firefox
+  packages:
+    - curl
+    - git
+    - tmux
+    - vim
+
+  # at the end of the installation
+  updates: security # 'security' or 'all'
+  shutdown: poweroff # 'reboot' or 'poweroff', for right after intallation
+
+  #early-commands:
+  #  - foobar
+
+  late-commands:
+    # it's usual for the ubuntu user to have password-less sudo by default on cloud images
+    - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/ubuntu
+    # changes to grub
+    - curtin in-target -- sed -i -e '/GRUB_CMDLINE_LINUX_DEFAULT=/ s/=.*/=""/' /etc/default/grub
+    - curtin in-target -- update-grub2
+    # remove some cloud-init installer override files that create problems on first boot
+    - curtin in-target -- rm -f /etc/cloud/cloud.cfg.d/90-installer-network.cfg
+    - curtin in-target -- rm -f /etc/cloud/cloud.cfg.d/99-installer.cfg
+
+# vim:nowrap:bg=dark
