@@ -14,6 +14,16 @@ customize it (instead of adding more scripts to this plan).
 Keeping this one small and clean helps the autointaller not to break
 and removes redundancy.
 
+Note: this is not trying by any means to mimic an officially
+published image from Canonical. Those images are smaller,
+cleaner and have some post-processing not available here.
+You would probably be better suited getting an official image
+and just customizing it with the qcow2-to-qcow2 scripts instead.
+This stage is meant as a last resource in case you really want
+to customize things like partitioning, etc. If you use this, make
+sure you add or remove packages to cover your needs.
+
+
 ATTENTION:
 
 This installation WILL NOT REBOOT, it will just shutdown after curtin
